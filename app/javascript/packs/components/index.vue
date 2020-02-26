@@ -11,11 +11,11 @@
         </div>
       </div>
     </div>
-    <div>
+    <div id="tasks">
       <ul class="collection">
         <li v-for="task in tasks" v-if="!task.is_done" v-bind:id="'row_task_' + task.id" class="collection-item">
           <label>
-            <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" />
+            <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" :checked="task.is_done" />
             <span v-bind:for="'task_' + task.id" class="black-text">{{ task.name }}</span>
           </label>
         </li>
@@ -26,8 +26,8 @@
       <ul class="collection">
         <li v-for="task in tasks" v-if="task.is_done"v-bind:id="'row_task_' + task.id" class="collection-item">
           <label>
-            <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" />
-            <span v-bind:for="'task_' + task.id" class="black-text">{{ task.name }}</span>
+            <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" :checked="task.is_done" />
+            <span v-bind:for="'task_' + task.id" class="line-through">{{ task.name }}</span>
           </label>
         </li>
       </ul>
@@ -71,11 +71,25 @@ export default {
       });
     },
     doneTask: function (task_id) {
-      axios.put('/api/tasks/' + task_id, { task: { is_done: 1 } }).then((response) => {
-        this.moveFinishedTask(task_id);
-      }, (error) => {
-        console.log(error);
-      });
+      var el = document.querySelector('#row_task_' + task_id);
+      var el_clone = el.cloneNode(true);
+      if (el.getElementsByTagName('input')[0].checked == true) {
+        axios.put('/api/tasks/' + task_id, { task: { is_done: 1 } }).then((response) => {
+          this.moveFinishedTask(task_id);
+          console.log('finish');
+          console.log(task_id);
+        }, (error) => {
+          console.log(error);
+        });
+      } else {
+        axios.put('/api/tasks/' + task_id, { task: { is_done: 0 } }).then((response) => {
+          this.moveTask(task_id);
+          console.log('open');
+          console.log(task_id);
+        }, (error) => {
+          console.log(error);
+        });
+      }
     },
     moveFinishedTask: function(task_id) {
       var el = document.querySelector('#row_task_' + task_id);
@@ -84,11 +98,23 @@ export default {
       // 未完了の方を先に非表示にする
       el.classList.add('display_none');
       // もろもろスタイルなどをたして完了済みに追加
-      el_clone.getElementsByTagName('input')[0].checked = 'checked';
       el_clone.getElementsByTagName('span')[0].classList.add('line-through');
       el_clone.getElementsByTagName('span')[0].classList.remove('black-text');
       var li = document.querySelector('#finished-tasks > ul > li:first-child');
       document.querySelector('#finished-tasks > ul').insertBefore(el_clone, li);
+    },
+    moveTask: function(task_id) {
+      var el = document.querySelector('#row_task_' + task_id);
+      // DOMをクローンしておく
+      var el_clone = el.cloneNode(true);
+      // 未完了の方を先に非表示にする
+      el_clone.classList.remove('display_none');
+      el.classList.add('display_none');
+      // もろもろスタイルなどをたして完了済みに追加
+      el_clone.getElementsByTagName('span')[0].classList.remove('line-through');
+      el_clone.getElementsByTagName('span')[0].classList.add('black-text');
+      var li = document.querySelector('#tasks > ul > li:first-child');
+      document.querySelector('#tasks > ul').insertBefore(el_clone, li);
     }
   }
 }
