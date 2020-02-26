@@ -5,6 +5,11 @@ class Api::TasksController < ApplicationController
     # 後々のため、更新順で返します
     @tasks = Task.order('updated_at DESC')
   end
+  # GET /task/:id
+  def show
+    # 後々のため、更新順で返します
+    @task = Task.find(params[:id])
+  end
 
   # POST /tasks
   def create

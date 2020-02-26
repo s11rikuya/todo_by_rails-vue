@@ -18,6 +18,7 @@
             <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" :checked="task.is_done" />
             <span v-bind:for="'task_' + task.id" class="black-text">{{ task.name }}</span>
           </label>
+          <router-link :to="{ name: 'task', params: { id: task.id }}">Show</router-link>
         </li>
       </ul>
     </div>
@@ -29,6 +30,7 @@
             <input type="checkbox" v-on:change="doneTask(task.id)" v-bind:id="'task_' + task.id" :checked="task.is_done" />
             <span v-bind:for="'task_' + task.id" class="line-through">{{ task.name }}</span>
           </label>
+          <router-link :to="{ name: 'task', params: { id: task.id }}">Show</router-link>
         </li>
       </ul>
     </div>
@@ -93,28 +95,17 @@ export default {
     },
     moveFinishedTask: function(task_id) {
       var el = document.querySelector('#row_task_' + task_id);
-      // DOMをクローンしておく
-      var el_clone = el.cloneNode(true);
-      // 未完了の方を先に非表示にする
-      el.classList.add('display_none');
-      // もろもろスタイルなどをたして完了済みに追加
-      el_clone.getElementsByTagName('span')[0].classList.add('line-through');
-      el_clone.getElementsByTagName('span')[0].classList.remove('black-text');
+      el.getElementsByTagName('span')[0].classList.add('line-through');
+      el.getElementsByTagName('span')[0].classList.remove('black-text');
       var li = document.querySelector('#finished-tasks > ul > li:first-child');
-      document.querySelector('#finished-tasks > ul').insertBefore(el_clone, li);
+      document.querySelector('#finished-tasks > ul').insertBefore(el, li);
     },
     moveTask: function(task_id) {
       var el = document.querySelector('#row_task_' + task_id);
-      // DOMをクローンしておく
-      var el_clone = el.cloneNode(true);
-      // 未完了の方を先に非表示にする
-      el_clone.classList.remove('display_none');
-      el.classList.add('display_none');
-      // もろもろスタイルなどをたして完了済みに追加
-      el_clone.getElementsByTagName('span')[0].classList.remove('line-through');
-      el_clone.getElementsByTagName('span')[0].classList.add('black-text');
+      el.getElementsByTagName('span')[0].classList.remove('line-through');
+      el.getElementsByTagName('span')[0].classList.add('black-text');
       var li = document.querySelector('#tasks > ul > li:first-child');
-      document.querySelector('#tasks > ul').insertBefore(el_clone, li);
+      document.querySelector('#tasks > ul').insertBefore(el, li);
     }
   }
 }
